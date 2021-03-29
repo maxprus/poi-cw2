@@ -7,7 +7,7 @@ import csv
 
 #Wczytywanie chmury
 def cloud_reader():
-    with open('LidarData.xyz', newline='') as csvfile:
+    with open('Lidar.csv', newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         for x, y, z in reader:
             yield (float(x), float(y), float(z))
