@@ -1,59 +1,44 @@
-from sklearn.cluster import KMeans
-from scipy.stats import norm
-
-import matplotlib.pyplot as plt
-import numpy as np
 import csv
+import numpy as np
+import matplotlib.pyplot as plt
 
-#Wczytywanie chmury
-def cloud_reader():
-    with open('Lidar.csv', newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        for x, y, z in reader:
-            yield (float(x), float(y), float(z))
-
-for p in cloud_reader():
+from sklearn.cluster import KMeans
+from sklearn.cluster import DBSCAN
 
 
-"""
-mns = [(5, 3), (15, 4), (10, 8)]
-scales = [(2, 1), (1, 1), (1, 2)]
+def csv_points():
+    with open(file="Lidar.csv", newline='') as csvfile:
+        read = csv.reader(csvfile, delimiter=',')
+        for x, y, z in read:
+            yield float(x), float(y), float(z)
 
 
-params = zip(mns, scales)
+if __name__ == '__main__':
+    read_points = list(csv_points())
+    X, Y, Z = zip(*read_points)
+    p = np.array(read_points)
 
-clusters = []
+    cluster = DBSCAN(eps=15, min_samples=10).fit(p)
+    labels = cluster.labels_
 
-for parset in params:
-    dist_x = norm(loc=parset[0][0], scale=parset[1][0])
-    dist_y = norm(loc=parset[0][1], scale=parset[1][1])
-    cluster_x = g(x)
-    cluster_y = g(y)
-    cluster_z = g(z)
-    cluster = zip(cluster_x, cluster_y, cluster_z)
-    clusters.extend(cluster)
+    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+    n_noise_ = list(labels).count(-1)
 
-x, y = zip(*clusters)
-plt.figure()
-plt.scatter(x, y)
-plt.title('Points scattering in 2D')
-plt.tight_layout()
-plt.xlabel('x')
+    print('Estimated number of clusters: %d' % n_clusters_)
+    print('Estimated number of noise points: %d' % n_noise_)
 
+    n_clusters = 3
+    k_means = KMeans(n_clusters=n_clusters)
+    k_means = k_means.fit(p)
+    labels = k_means.predict(p)
 
-clusterer = KMeans(n_clusters=3)
+    red = labels == 0
+    green = labels == 1
+    blue = labels == 2
 
-X = np.array(clusters)
-y_pred = clusterer.fit_predict(X)
-
-red = y_pred == 0
-blue = y_pred == 1
-cyan = y_pred == 2
-
-plt.figure()
-plt.scatter(X[red, 0], X[red, 1], c="red")
-plt.scatter(X[blue, 0], X[blue, 1], c="blue")
-plt.scatter(X[cyan, 0], X[cyan, 1], c="cyan")
-plt.show()
-"""
-
+    fig_2 = plt.figure()
+    ax_2 = fig_2.add_subplot(projection='3d')
+    ax_2.scatter(p[red, 0], p[red, 1], p[red, 2], marker='o')
+    ax_2.scatter(p[green, 0], p[green, 1], p[green, 2], marker='^')
+    ax_2.scatter(p[blue, 0], p[blue, 1], p[blue, 2], marker='x')
+    plt.show()
